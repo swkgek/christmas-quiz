@@ -221,22 +221,24 @@ body {
     overflow: hidden;
 }
 
-.answer-btn:hover:not(:disabled) {
+.answer-btn:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    background: #6c757d !important;
+    box-shadow: none !important;
+    pointer-events: none;
+}
+
+.answer-btn:not(:disabled):hover {
     background: var(--christmas-red);
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
 }
 
-.answer-btn:active:not(:disabled) {
+.answer-btn:not(:disabled):active {
     transform: translateY(0);
-}
-
-.answer-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    background: #6c757d;
 }
 
 .btn {
