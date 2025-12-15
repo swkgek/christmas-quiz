@@ -105,6 +105,7 @@
     protected override async Task OnInitializedAsync()
     {
         _currentQuestion = QuizService.GetCurrentQuestion();
+        _hasAnswered = false;
         
         try
         {
@@ -124,7 +125,19 @@
                 _hasAnswered = false;
                 InvokeAsync(StateHasChanged);
             });
-            _hubConnection.On("GameStarted", () => InvokeAsync(StateHasChanged));
+            _hubConnection.On("GameStarted", () => {
+                _currentQuestion = QuizService.GetCurrentQuestion();
+                _hasAnswered = false;
+                InvokeAsync(StateHasChanged);
+            });
+            _hubConnection.On("GameReset", () => {
+                _gameStarted = false;
+                _hasAnswered = false;
+                _currentTeam = null;
+                _currentPlayer = null;
+                _currentQuestion = QuizService.GetCurrentQuestion();
+                InvokeAsync(StateHasChanged);
+            });
 
             await _hubConnection.StartAsync();
         }
