@@ -231,10 +231,10 @@ body {
 }
 
 .answer-btn:not(:disabled):hover {
-    background: var(--christmas-red);
+    background: var(--dark-green);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    box-shadow: 0 6px 20px rgba(13, 81, 50, 0.4);
 }
 
 .answer-btn:not(:disabled):active {
