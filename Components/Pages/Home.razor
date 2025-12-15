@@ -1,9 +1,11 @@
 ﻿@page "/"
 @using Quiz.Services
 @using Quiz.Models
+@using Microsoft.AspNetCore.SignalR.Client
 @inject QuizService QuizService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
+@implements IAsyncDisposable
 
 <PageTitle>🎄 Christmas Quiz Challenge</PageTitle>
 
@@ -69,7 +71,7 @@
                     @for (int i = 0; i < _currentQuestion.Options.Count; i++)
                     {
                         int optionIndex = i;
-                        <button class="answer-btn" @onclick="() => SubmitAnswer(optionIndex)" disabled="@_hasAnswered">
+                        <button class="answer-btn" @onclick="async () => await SubmitAnswer(optionIndex)" disabled="@_hasAnswered">
                             @((char)('A' + i)). @_currentQuestion.Options[i]
                         </button>
                     }
@@ -98,33 +100,81 @@
     private Player? _currentPlayer;
     private QuizQuestion? _currentQuestion;
     private bool _hasAnswered = false;
+    private HubConnection? _hubConnection;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _currentQuestion = QuizService.GetCurrentQuestion();
+        
+        try
+        {
+            var hubUrl = Navigation.ToAbsoluteUri("/quizhub");
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(hubUrl, options =>
+                {
+                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets | 
+                                       Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+                })
+                .WithAutomaticReconnect()
+                .Build();
+
+            _hubConnection.On("UpdateGame", () => InvokeAsync(StateHasChanged));
+            _hubConnection.On("NextQuestion", () => {
+                _currentQuestion = QuizService.GetCurrentQuestion();
+                _hasAnswered = false;
+                InvokeAsync(StateHasChanged);
+            });
+            _hubConnection.On("GameStarted", () => InvokeAsync(StateHasChanged));
+
+            await _hubConnection.StartAsync();
+        }
+        catch
+        {
+            // SignalR failed, continue without real-time updates
+        }
     }
 
-    private void JoinTeam()
+    private async Task JoinTeam()
     {
         _currentTeam = QuizService.JoinTeam(_teamName, _playerName);
         _currentPlayer = _currentTeam.Players.First(p => p.Name == _playerName);
         _gameStarted = true;
+        
+        if (_hubConnection?.State == HubConnectionState.Connected)
+        {
+            try { await _hubConnection.SendAsync("UpdateGame"); } catch { }
+        }
+        
         StateHasChanged();
     }
 
     private void JoinExistingTeam(string teamName)
     {
         _teamName = teamName;
-        JoinTeam();
+        _ = JoinTeam();
     }
 
-    private void SubmitAnswer(int answerIndex)
+    private async Task SubmitAnswer(int answerIndex)
     {
         if (_currentTeam != null && !_hasAnswered)
         {
             QuizService.SubmitAnswer(_currentTeam.Id, answerIndex);
             _hasAnswered = true;
+            
+            if (_hubConnection?.State == HubConnectionState.Connected)
+            {
+                try { await _hubConnection.SendAsync("UpdateGame"); } catch { }
+            }
+            
             StateHasChanged();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
         }
     }
 }
