@@ -230,11 +230,20 @@ body {
     pointer-events: none;
 }
 
-.answer-btn:not(:disabled):hover {
-    background: var(--dark-green);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(13, 81, 50, 0.4);
+@media (hover: hover) {
+    .answer-btn:not(:disabled):hover {
+        background: var(--dark-green);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(13, 81, 50, 0.4);
+    }
+}
+
+@media (hover: none) {
+    .answer-btn:not(:disabled):active {
+        background: var(--dark-green);
+        transform: scale(0.98);
+    }
 }
 
 .answer-btn:not(:disabled):active {
