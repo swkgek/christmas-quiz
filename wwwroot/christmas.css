@@ -1,0 +1,345 @@
+:root {
+    --christmas-red: #dc3545;
+    --christmas-green: #198754;
+    --christmas-gold: #ffc107;
+    --snow-white: #ffffff;
+    --dark-green: #0d5132;
+    --light-gray: #f8f9fa;
+    --shadow: 0 4px 20px rgba(0,0,0,0.1);
+    --accent-blue: #0d6efd;
+}
+
+body {
+    background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #1a472a 100%);
+    color: #212529;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    background-attachment: fixed;
+}
+
+.christmas-card {
+    background: var(--snow-white);
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    color: #2c3e50;
+    margin: 50px 15px;
+    padding: 50px 30px;
+    backdrop-filter: blur(10px);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 768px) {
+    .christmas-card {
+        margin: 60px 10px;
+        padding: 40px 20px;
+        border-radius: 20px;
+    }
+    
+    .quiz-title {
+        font-size: 2.2rem !important;
+        margin-bottom: 25px;
+    }
+    
+    .question-card {
+        padding: 25px 20px !important;
+        margin: 20px 0;
+    }
+    
+    .answer-btn {
+        width: 100%;
+        margin: 8px 0;
+        padding: 18px 20px;
+        font-size: 1.1rem;
+        border-radius: 12px;
+    }
+    
+    .team-join-btn {
+        width: 100%;
+        margin: 12px 0;
+        padding: 20px;
+    }
+    
+    .container-fluid {
+        padding: 0;
+    }
+    
+    .team-board {
+        margin: 20px 0;
+        padding: 25px 20px;
+    }
+    
+    .team-item {
+        padding: 18px 20px;
+        margin: 10px 0;
+    }
+    
+    .mobile-nav {
+        padding: 15px 20px;
+    }
+    
+    .nav-title {
+        font-size: 1.1rem;
+    }
+}
+
+.quiz-title {
+    color: var(--christmas-green);
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+    line-height: 1.2;
+}
+
+.quiz-title-mobile {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.team-board {
+    background: linear-gradient(135deg, var(--christmas-green), var(--dark-green));
+    border-radius: 16px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: var(--shadow);
+}
+
+.team-item {
+    background: rgba(255,255,255,0.95);
+    color: var(--christmas-green);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 12px 0;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.team-item:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    background: var(--snow-white);
+}
+
+.team-join-btn {
+    background: var(--snow-white);
+    color: var(--christmas-green);
+    border: 2px solid var(--christmas-green);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin: 12px auto;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 400px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow);
+}
+
+.team-join-btn:hover:not(:disabled) {
+    background: var(--christmas-green);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(25, 135, 84, 0.3);
+    border-color: var(--christmas-green);
+}
+
+.team-join-btn:hover:not(:disabled) .join-badge {
+    background: var(--christmas-gold);
+    color: #2c3e50;
+}
+
+.team-join-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.join-badge {
+    background: var(--christmas-red);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.question-card {
+    background: linear-gradient(135deg, var(--christmas-red), #e91e63);
+    color: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 20px 0;
+    text-align: center;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.question-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="20" opacity="0.1">❄️</text></svg>') repeat;
+    pointer-events: none;
+}
+
+.answer-btn {
+    background: var(--christmas-green);
+    border: none;
+    color: white;
+    padding: 16px 24px;
+    margin: 8px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+    box-shadow: 0 3px 12px rgba(25, 135, 84, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.answer-btn:hover:not(:disabled) {
+    background: var(--christmas-red);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.answer-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.answer-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    background: #6c757d;
+}
+
+.btn {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.mobile-nav {
+    background: var(--christmas-green);
+    padding: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    margin: 0;
+}
+
+.mobile-nav .nav-title,
+.mobile-nav .nav-icons {
+    padding: 0 20px;
+}
+
+.nav-title {
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.nav-icons {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-icon-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+}
+
+.nav-icon-btn:hover {
+    background: rgba(255,255,255,0.3);
+    color: white;
+    text-decoration: none;
+    transform: scale(1.05);
+}
+
+.snowflake {
+    position: fixed;
+    top: -10px;
+    z-index: 1000;
+    user-select: none;
+    pointer-events: none;
+    color: rgba(255,255,255,0.9);
+    font-size: 18px;
+    animation: fall linear infinite;
+    text-shadow: 0 0 3px rgba(255,255,255,0.5);
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+
+/* Form inputs */
+.form-control {
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    padding: 12px 16px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: var(--christmas-green);
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+/* Badge styles */
+.badge {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+}

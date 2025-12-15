@@ -1,0 +1,179 @@
+@page "/display"
+@using Quiz.Services
+@using Quiz.Models
+@using Microsoft.AspNetCore.SignalR.Client
+@inject QuizService QuizService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+
+<PageTitle>🎄 Christmas Quiz - TV Display</PageTitle>
+
+<style>
+    body { font-size: 1.5rem; }
+    .tv-display { padding: 40px; }
+    .question-display { 
+        background: var(--christmas-red);
+        color: white;
+        padding: 60px;
+        border-radius: 20px;
+        text-align: center;
+        margin: 40px 0;
+        font-size: 2rem;
+    }
+    .leaderboard-tv {
+        background: var(--christmas-green);
+        padding: 40px;
+        border-radius: 20px;
+        margin: 40px 0;
+    }
+    .team-tv {
+        background: white;
+        color: var(--christmas-green);
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 15px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+</style>
+
+<div class="tv-display">
+    <h1 class="quiz-title" style="font-size: 4rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Christmas Quiz Challenge  🎅</h1>
+    
+    @if (_gameState.IsActive && _currentQuestion != null)
+    {
+        <div class="question-display">
+            <h2>Question @(_gameState.CurrentQuestionIndex + 1) of 50</h2>
+            <h3 style="color: var(--christmas-gold);">@_currentQuestion.Category</h3>
+            <h1 style="margin: 40px 0;">@_currentQuestion.Question</h1>
+            
+            <div class="row mt-5">
+                @for (int i = 0; i < _currentQuestion.Options.Count; i++)
+                {
+                    var isCorrect = _gameState.ShowResults && i == _currentQuestion.CorrectAnswer;
+                    <div class="col-6 mb-3">
+                        <div style="background: @(isCorrect ? "#28a745" : "rgba(255,255,255,0.2)"); padding: 20px; border-radius: 15px; font-size: 1.5rem; transition: all 0.5s;">
+                            @((char)('A' + i)). @_currentQuestion.Options[i]
+                            @if (isCorrect) { <span style="float: right;">✅</span> }
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            @if (_gameState.ShowResults)
+            {
+                <div class="mt-5" style="background: rgba(0,0,0,0.3); padding: 30px; border-radius: 15px;">
+                    <h3>✅ Correct Answer: @((char)('A' + _currentQuestion.CorrectAnswer)). @_currentQuestion.Options[_currentQuestion.CorrectAnswer]</h3>
+                </div>
+            }
+            
+            <div class="mt-4">
+                <button class="answer-btn me-3" @onclick="ShowResults" disabled="@_gameState.ShowResults">
+                    📊 Show Results
+                </button>
+                <button class="answer-btn me-3" @onclick="NextQuestion" disabled="@(!_gameState.ShowResults)">
+                    ➡️ Next Question
+                </button>
+                <button class="answer-btn" @onclick="ToggleLeaderboard">
+                    @(_showLeaderboard ? "🙈 Hide" : "🏆 Show") Scores
+                </button>
+            </div>
+        </div>
+    }
+    else if (!_gameState.IsActive && _gameState.CurrentQuestionIndex == 0)
+    {
+        <div class="text-center">
+            <h2 style="font-size: 3rem; margin: 60px 0; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Waiting for Quiz Master to Start Game</h2>
+            <p style="font-size: 2rem; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Teams can join at: <strong>@Navigation.BaseUri</strong></p>
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <h2 style="font-size: 4rem; margin: 60px 0; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">🏆 QUIZ COMPLETE! 🏆</h2>
+        </div>
+    }
+    
+    @if (_showLeaderboard)
+    {
+        <div class="leaderboard-tv">
+            <h2 style="color: white; text-align: center; font-size: 3rem;">🏆 LEADERBOARD 🏆</h2>
+            @foreach (var team in QuizService.GetTeams())
+            {
+                <div class="team-tv">
+                    <span>@team.Name</span>
+                    <span>@team.Score points</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private QuizQuestion? _currentQuestion;
+    private GameState _gameState = new();
+    private HubConnection? _hubConnection;
+    private bool _showLeaderboard = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _currentQuestion = QuizService.GetCurrentQuestion();
+        _gameState = QuizService.GetGameState();
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/quizhub"))
+            .Build();
+
+        _hubConnection.On("UpdateGame", () => InvokeAsync(StateHasChanged));
+        _hubConnection.On("NextQuestion", () => {
+            _currentQuestion = QuizService.GetCurrentQuestion();
+            _gameState = QuizService.GetGameState();
+            InvokeAsync(StateHasChanged);
+        });
+        _hubConnection.On("GameStarted", () => {
+            _gameState = QuizService.GetGameState();
+            _currentQuestion = QuizService.GetCurrentQuestion();
+            InvokeAsync(StateHasChanged);
+        });
+
+        await _hubConnection.StartAsync();
+    }
+
+    private async Task ShowResults()
+    {
+        QuizService.ShowResults();
+        _gameState = QuizService.GetGameState();
+        
+        if (_hubConnection is not null)
+            await _hubConnection.SendAsync("UpdateGame");
+        
+        StateHasChanged();
+    }
+
+    private async Task NextQuestion()
+    {
+        QuizService.NextQuestion();
+        _currentQuestion = QuizService.GetCurrentQuestion();
+        _gameState = QuizService.GetGameState();
+        
+        if (_hubConnection is not null)
+            await _hubConnection.SendAsync("NextQuestion");
+        
+        StateHasChanged();
+    }
+
+    private void ToggleLeaderboard()
+    {
+        _showLeaderboard = !_showLeaderboard;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+            await _hubConnection.DisposeAsync();
+    }
+}

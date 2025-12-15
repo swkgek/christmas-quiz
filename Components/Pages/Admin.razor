@@ -1,0 +1,207 @@
+@page "/admin"
+@using Quiz.Services
+@using Quiz.Models
+@using Microsoft.AspNetCore.SignalR.Client
+@inject QuizService QuizService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+
+<PageTitle>🎄 Quiz Master</PageTitle>
+
+<div class="christmas-card">
+    <h1 class="quiz-title">🎅<br />Quiz Master Control</h1>
+    
+    @if (!_gameState.IsActive && _gameState.CurrentQuestionIndex == 0)
+    {
+        <div class="text-center mb-4">
+            <h3>Setup Teams</h3>
+            <div class="mb-3">
+                <input @bind="_newTeamName" class="form-control" placeholder="Team name" style="max-width: 300px; margin: 0 auto;" />
+                <button class="btn answer-btn mt-2" @onclick="CreateTeam" disabled="@string.IsNullOrWhiteSpace(_newTeamName)">Add Team</button>
+            </div>
+            
+            @if (QuizService.GetTeams().Any())
+            {
+                <button class="btn" style="background: var(--christmas-red); color: white; font-size: 1.2rem; padding: 15px 30px;" @onclick="StartGame">
+                    🎄 START QUIZ 🎄
+                </button>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center mb-3">
+            <a href="/display" target="_blank" class="btn answer-btn me-2">Open TV Display 📺</a>
+            <button class="btn answer-btn" @onclick="ResetGame">🔄 Reset Game</button>
+        </div>
+    }
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="team-board">
+                <h4 style="color: white; text-align: center;">📊 Live Scoreboard</h4>
+                @foreach (var team in QuizService.GetTeams())
+                {
+                    <div class="team-item">
+                        <div>
+                            <strong>@team.Name</strong>
+                            @if (team.Players.Any())
+                            {
+                                <br><small>@string.Join(", ", team.Players.Select(p => p.Name))</small>
+                            }
+                        </div>
+                        <span>@team.Score points</span>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="question-card">
+                <h4>Question @(_gameState.CurrentQuestionIndex + 1) of 50</h4>
+                @if (_currentQuestion != null)
+                {
+                    <h5>Category: @_currentQuestion.Category</h5>
+                    <p>@_currentQuestion.Question</p>
+                    <p><strong>Correct Answer:</strong> @_currentQuestion.Options[_currentQuestion.CorrectAnswer]</p>
+                    <p><strong>Points:</strong> @_currentQuestion.Points</p>
+                }
+                
+                <div class="mt-3">
+                    <div class="mb-3">
+                        <h6>Teams Answered: @_gameState.TeamAnswers.Count / @QuizService.GetTeams().Count</h6>
+                        @foreach (var team in QuizService.GetTeams())
+                        {
+                            var hasAnswered = _gameState.TeamAnswers.ContainsKey(team.Id);
+                            <span class="badge me-2" style="background: @(hasAnswered ? "green" : "red"); color: white;">
+                                @team.Name @(hasAnswered ? "✅" : "⏳")
+                            </span>
+                        }
+                    </div>
+                    <button class="answer-btn me-2" @onclick="ShowResults" disabled="@_gameState.ShowResults">
+                        📊 Show Results
+                    </button>
+                    <button class="answer-btn me-2" @onclick="NextQuestion" disabled="@(!_gameState.ShowResults)">
+                        ➡️ Next Question
+                    </button>
+                    <button class="answer-btn" @onclick="EndQuiz" disabled="@(_gameState.CurrentQuestionIndex < 49)">
+                        🏁 End Quiz
+                    </button>
+                </div>
+                
+                @if (_gameState.ShowResults)
+                {
+                    <div class="mt-3">
+                        <h6>Team Answers:</h6>
+                        @foreach (var answer in _gameState.TeamAnswers)
+                        {
+                            var team = QuizService.GetTeams().FirstOrDefault(t => t.Id == answer.Key);
+                            var isCorrect = answer.Value == _currentQuestion?.CorrectAnswer;
+                            <p style="color: @(isCorrect ? "lightgreen" : "lightcoral")">
+                                @team?.Name: @(_currentQuestion?.Options.ElementAtOrDefault(answer.Value) ?? "No answer") 
+                                @(isCorrect ? "✅" : "❌")
+                            </p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private QuizQuestion? _currentQuestion;
+    private GameState _gameState = new();
+    private HubConnection? _hubConnection;
+    private string _newTeamName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _currentQuestion = QuizService.GetCurrentQuestion();
+        _gameState = QuizService.GetGameState();
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/quizhub"))
+            .Build();
+
+        _hubConnection.On("UpdateGame", () => InvokeAsync(StateHasChanged));
+
+        await _hubConnection.StartAsync();
+    }
+
+    private async Task CreateTeam()
+    {
+        QuizService.CreateTeam(_newTeamName);
+        _newTeamName = "";
+        
+        if (_hubConnection is not null)
+            await _hubConnection.SendAsync("UpdateGame");
+        
+        StateHasChanged();
+    }
+
+    private async Task StartGame()
+    {
+        QuizService.StartGame();
+        _gameState = QuizService.GetGameState();
+        _currentQuestion = QuizService.GetCurrentQuestion();
+        
+        if (_hubConnection is not null)
+            await _hubConnection.SendAsync("GameStarted");
+        
+        StateHasChanged();
+    }
+
+    private async Task ShowResults()
+    {
+        QuizService.ShowResults();
+        _gameState = QuizService.GetGameState();
+        
+        if (_hubConnection is not null)
+            await _hubConnection.SendAsync("UpdateGame");
+        
+        StateHasChanged();
+    }
+
+    private async Task NextQuestion()
+    {
+        QuizService.NextQuestion();
+        _currentQuestion = QuizService.GetCurrentQuestion();
+        _gameState = QuizService.GetGameState();
+        
+        if (_hubConnection is not null)
+            await _hubConnection.SendAsync("NextQuestion");
+        
+        StateHasChanged();
+    }
+
+    private async Task ResetGame()
+    {
+        QuizService.ResetGame();
+        _currentQuestion = QuizService.GetCurrentQuestion();
+        _gameState = QuizService.GetGameState();
+        
+        if (_hubConnection is not null)
+            await _hubConnection.SendAsync("GameReset");
+        
+        StateHasChanged();
+    }
+
+    private async Task EndQuiz()
+    {
+        QuizService.EndQuiz();
+        _gameState = QuizService.GetGameState();
+        
+        if (_hubConnection is not null)
+            await _hubConnection.SendAsync("QuizEnded");
+        
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+            await _hubConnection.DisposeAsync();
+    }
+}
