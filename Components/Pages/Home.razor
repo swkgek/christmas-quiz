@@ -1,11 +1,9 @@
 ﻿@page "/"
 @using Quiz.Services
 @using Quiz.Models
-@using Microsoft.AspNetCore.SignalR.Client
 @inject QuizService QuizService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
-@implements IAsyncDisposable
 
 <PageTitle>🎄 Christmas Quiz Challenge</PageTitle>
 
@@ -100,36 +98,17 @@
     private Player? _currentPlayer;
     private QuizQuestion? _currentQuestion;
     private bool _hasAnswered = false;
-    private HubConnection? _hubConnection;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         _currentQuestion = QuizService.GetCurrentQuestion();
-
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/quizhub"))
-            .Build();
-
-        _hubConnection.On("UpdateGame", () => InvokeAsync(StateHasChanged));
-        _hubConnection.On("NextQuestion", () => {
-            _currentQuestion = QuizService.GetCurrentQuestion();
-            _hasAnswered = false;
-            InvokeAsync(StateHasChanged);
-        });
-        _hubConnection.On("GameStarted", () => InvokeAsync(StateHasChanged));
-
-        await _hubConnection.StartAsync();
     }
 
-    private async Task JoinTeam()
+    private void JoinTeam()
     {
         _currentTeam = QuizService.JoinTeam(_teamName, _playerName);
         _currentPlayer = _currentTeam.Players.First(p => p.Name == _playerName);
         _gameStarted = true;
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("UpdateGame");
-        
         StateHasChanged();
     }
 
@@ -139,23 +118,13 @@
         _ = JoinTeam();
     }
 
-    private async Task SubmitAnswer(int answerIndex)
+    private void SubmitAnswer(int answerIndex)
     {
         if (_currentTeam != null && !_hasAnswered)
         {
             QuizService.SubmitAnswer(_currentTeam.Id, answerIndex);
             _hasAnswered = true;
-            
-            if (_hubConnection is not null)
-                await _hubConnection.SendAsync("UpdateGame");
-            
             StateHasChanged();
         }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_hubConnection is not null)
-            await _hubConnection.DisposeAsync();
     }
 }

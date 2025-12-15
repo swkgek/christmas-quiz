@@ -1,11 +1,9 @@
 @page "/admin"
 @using Quiz.Services
 @using Quiz.Models
-@using Microsoft.AspNetCore.SignalR.Client
 @inject QuizService QuizService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
-@implements IAsyncDisposable
 
 <PageTitle>🎄 Quiz Master</PageTitle>
 
@@ -113,95 +111,56 @@
 @code {
     private QuizQuestion? _currentQuestion;
     private GameState _gameState = new();
-    private HubConnection? _hubConnection;
     private string _newTeamName = "";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         _currentQuestion = QuizService.GetCurrentQuestion();
         _gameState = QuizService.GetGameState();
-
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/quizhub"))
-            .Build();
-
-        _hubConnection.On("UpdateGame", () => InvokeAsync(StateHasChanged));
-
-        await _hubConnection.StartAsync();
     }
 
-    private async Task CreateTeam()
+    private void CreateTeam()
     {
         QuizService.CreateTeam(_newTeamName);
         _newTeamName = "";
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("UpdateGame");
-        
         StateHasChanged();
     }
 
-    private async Task StartGame()
+    private void StartGame()
     {
         QuizService.StartGame();
         _gameState = QuizService.GetGameState();
         _currentQuestion = QuizService.GetCurrentQuestion();
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("GameStarted");
-        
         StateHasChanged();
     }
 
-    private async Task ShowResults()
+    private void ShowResults()
     {
         QuizService.ShowResults();
         _gameState = QuizService.GetGameState();
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("UpdateGame");
-        
         StateHasChanged();
     }
 
-    private async Task NextQuestion()
+    private void NextQuestion()
     {
         QuizService.NextQuestion();
         _currentQuestion = QuizService.GetCurrentQuestion();
         _gameState = QuizService.GetGameState();
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("NextQuestion");
-        
         StateHasChanged();
     }
 
-    private async Task ResetGame()
+    private void ResetGame()
     {
         QuizService.ResetGame();
         _currentQuestion = QuizService.GetCurrentQuestion();
         _gameState = QuizService.GetGameState();
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("GameReset");
-        
         StateHasChanged();
     }
 
-    private async Task EndQuiz()
+    private void EndQuiz()
     {
         QuizService.EndQuiz();
         _gameState = QuizService.GetGameState();
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("QuizEnded");
-        
         StateHasChanged();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_hubConnection is not null)
-            await _hubConnection.DisposeAsync();
     }
 }

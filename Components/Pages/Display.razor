@@ -1,11 +1,9 @@
 @page "/display"
 @using Quiz.Services
 @using Quiz.Models
-@using Microsoft.AspNetCore.SignalR.Client
 @inject QuizService QuizService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
-@implements IAsyncDisposable
 
 <PageTitle>🎄 Christmas Quiz - TV Display</PageTitle>
 
@@ -115,53 +113,26 @@
 @code {
     private QuizQuestion? _currentQuestion;
     private GameState _gameState = new();
-    private HubConnection? _hubConnection;
     private bool _showLeaderboard = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         _currentQuestion = QuizService.GetCurrentQuestion();
         _gameState = QuizService.GetGameState();
-
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/quizhub"))
-            .Build();
-
-        _hubConnection.On("UpdateGame", () => InvokeAsync(StateHasChanged));
-        _hubConnection.On("NextQuestion", () => {
-            _currentQuestion = QuizService.GetCurrentQuestion();
-            _gameState = QuizService.GetGameState();
-            InvokeAsync(StateHasChanged);
-        });
-        _hubConnection.On("GameStarted", () => {
-            _gameState = QuizService.GetGameState();
-            _currentQuestion = QuizService.GetCurrentQuestion();
-            InvokeAsync(StateHasChanged);
-        });
-
-        await _hubConnection.StartAsync();
     }
 
-    private async Task ShowResults()
+    private void ShowResults()
     {
         QuizService.ShowResults();
         _gameState = QuizService.GetGameState();
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("UpdateGame");
-        
         StateHasChanged();
     }
 
-    private async Task NextQuestion()
+    private void NextQuestion()
     {
         QuizService.NextQuestion();
         _currentQuestion = QuizService.GetCurrentQuestion();
         _gameState = QuizService.GetGameState();
-        
-        if (_hubConnection is not null)
-            await _hubConnection.SendAsync("NextQuestion");
-        
         StateHasChanged();
     }
 
@@ -171,9 +142,5 @@
         StateHasChanged();
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        if (_hubConnection is not null)
-            await _hubConnection.DisposeAsync();
-    }
+
 }
