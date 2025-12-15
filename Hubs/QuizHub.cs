@@ -6,26 +6,26 @@ public class QuizHub : Hub
 {
     public async Task UpdateGame()
     {
-        await Clients.All.SendAsync("UpdateGame");
+        await Clients.Others.SendAsync("UpdateGame");
     }
 
     public async Task NextQuestion()
     {
-        await Clients.All.SendAsync("NextQuestion");
+        await Clients.Others.SendAsync("NextQuestion");
     }
 
     public async Task GameStarted()
     {
-        await Clients.All.SendAsync("GameStarted");
+        await Clients.Others.SendAsync("GameStarted");
     }
 
     public async Task GameReset()
     {
-        await Clients.All.SendAsync("GameReset");
+        await Clients.Others.SendAsync("GameReset");
     }
 
     public async Task QuizEnded()
     {
-        await Clients.All.SendAsync("QuizEnded");
+        await Clients.Others.SendAsync("QuizEnded");
     }
 }

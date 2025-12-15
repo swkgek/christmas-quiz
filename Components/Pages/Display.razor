@@ -1,9 +1,11 @@
 @page "/display"
 @using Quiz.Services
 @using Quiz.Models
+@using Microsoft.AspNetCore.SignalR.Client
 @inject QuizService QuizService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
+@implements IAsyncDisposable
 
 <PageTitle>🎄 Christmas Quiz - TV Display</PageTitle>
 
@@ -114,26 +116,80 @@
     private QuizQuestion? _currentQuestion;
     private GameState _gameState = new();
     private bool _showLeaderboard = false;
+    private HubConnection? _hubConnection;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _currentQuestion = QuizService.GetCurrentQuestion();
         _gameState = QuizService.GetGameState();
+        
+        try
+        {
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(Navigation.ToAbsoluteUri("/quizhub"), options =>
+                {
+                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets | 
+                                       Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+                })
+                .WithAutomaticReconnect()
+                .Build();
+
+            _hubConnection.On("UpdateGame", () => {
+                _gameState = QuizService.GetGameState();
+                InvokeAsync(StateHasChanged);
+            });
+            _hubConnection.On("NextQuestion", () => {
+                _currentQuestion = QuizService.GetCurrentQuestion();
+                _gameState = QuizService.GetGameState();
+                InvokeAsync(StateHasChanged);
+            });
+            _hubConnection.On("GameStarted", () => {
+                _gameState = QuizService.GetGameState();
+                _currentQuestion = QuizService.GetCurrentQuestion();
+                InvokeAsync(StateHasChanged);
+            });
+
+            await _hubConnection.StartAsync();
+        }
+        catch
+        {
+            // Continue without SignalR
+        }
     }
 
-    private void ShowResults()
+    private async Task ShowResults()
     {
         QuizService.ShowResults();
         _gameState = QuizService.GetGameState();
+        
+        if (_hubConnection?.State == HubConnectionState.Connected)
+        {
+            try { await _hubConnection.SendAsync("UpdateGame"); } catch { }
+        }
+        
         StateHasChanged();
     }
 
-    private void NextQuestion()
+    private async Task NextQuestion()
     {
         QuizService.NextQuestion();
         _currentQuestion = QuizService.GetCurrentQuestion();
         _gameState = QuizService.GetGameState();
+        
+        if (_hubConnection?.State == HubConnectionState.Connected)
+        {
+            try { await _hubConnection.SendAsync("NextQuestion"); } catch { }
+        }
+        
         StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
     }
 
     private void ToggleLeaderboard()
