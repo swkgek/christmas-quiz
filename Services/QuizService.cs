@@ -88,66 +88,45 @@ public class QuizService
 
         var allQuestions = new List<(string category, string question, string[] options, int correct, int points)>
         {
-            // Christmas Questions (25)
+            // Christmas Questions (10)
             ("Christmas Movies", "In 'Home Alone', where does Kevin's family go on vacation?", new[] {"Paris", "London", "Rome", "Madrid"}, 0, 1),
             ("Christmas Movies", "What's the name of the Grinch's dog?", new[] {"Max", "Rex", "Buddy", "Charlie"}, 0, 1),
             ("Christmas Movies", "In 'Elf', what are the four main food groups?", new[] {"Candy, candy canes, candy corns, syrup", "Sugar, sweets, chocolate, gum", "Cookies, cake, ice cream, candy", "Chocolate, caramel, fudge, toffee"}, 0, 1),
-            ("Christmas Movies", "What does George Bailey want to do at the beginning of 'It's a Wonderful Life'?", new[] {"Travel the world", "Get married", "Start a business", "Move to the city"}, 0, 1),
-            ("Christmas Movies", "In 'The Polar Express', what is the first gift of Christmas?", new[] {"A bell from Santa's sleigh", "A train ticket", "Hot chocolate", "A golden ticket"}, 0, 1),
             ("Christmas Songs", "Which song contains the lyric 'Chestnuts roasting on an open fire'?", new[] {"The Christmas Song", "White Christmas", "Silver Bells", "Let it Snow"}, 0, 1),
             ("Christmas Songs", "In 'The Twelve Days of Christmas', what is given on the 5th day?", new[] {"Five golden rings", "Five calling birds", "Five French hens", "Five geese a-laying"}, 0, 1),
             ("Christmas Songs", "Who originally sang 'Blue Christmas'?", new[] {"Elvis Presley", "Bing Crosby", "Frank Sinatra", "Dean Martin"}, 0, 1),
-            ("Christmas Songs", "Complete the lyric: 'I'm dreaming of a white Christmas, just like...'", new[] {"the ones I used to know", "the movies I have seen", "my childhood memories", "the stories I've been told"}, 0, 1),
-            ("Christmas Songs", "What Christmas song was originally written for Thanksgiving?", new[] {"Jingle Bells", "White Christmas", "Silent Night", "Deck the Halls"}, 0, 1),
             ("Christmas Traditions", "Which country started the tradition of putting up a Christmas tree?", new[] {"Germany", "England", "France", "Norway"}, 0, 1),
-            ("Christmas Traditions", "What do people traditionally put on top of a Christmas tree?", new[] {"Star or Angel", "Cross", "Bell", "Crown"}, 0, 1),
-            ("Christmas Traditions", "In which country did the tradition of Christmas stockings originate?", new[] {"Turkey", "Italy", "Greece", "Spain"}, 0, 1),
-            ("Christmas Traditions", "What plant is known as the Christmas flower?", new[] {"Poinsettia", "Holly", "Mistletoe", "Pine"}, 0, 1),
-            ("Christmas Traditions", "Boxing Day is celebrated on which date?", new[] {"December 26th", "December 27th", "January 1st", "December 24th"}, 0, 1),
             ("Christmas Food", "What spice is used to flavor traditional Christmas eggnog?", new[] {"Nutmeg", "Cinnamon", "Cloves", "Ginger"}, 0, 1),
-            ("Christmas Food", "What type of cake is traditionally eaten at Christmas in Britain?", new[] {"Christmas Pudding", "Fruitcake", "Sponge Cake", "Chocolate Cake"}, 0, 1),
-            ("Christmas Food", "Which country is famous for its Christmas stollen?", new[] {"Germany", "Austria", "Switzerland", "Netherlands"}, 0, 1),
-            ("Christmas Food", "What are Christmas cookies called in Britain?", new[] {"Christmas biscuits", "Holiday treats", "Festive cakes", "Yuletide sweets"}, 0, 1),
-            ("Christmas Food", "What meat is traditionally served at Christmas dinner in the UK?", new[] {"Turkey", "Ham", "Beef", "Goose"}, 0, 1),
             ("Santa & Reindeer", "How many reindeer pull Santa's sleigh (including Rudolph)?", new[] {"9", "8", "10", "7"}, 0, 1),
-            ("Santa & Reindeer", "What is the name of Rudolph's father?", new[] {"Donner", "Dasher", "Comet", "Blitzen"}, 0, 1),
-            ("Santa & Reindeer", "In what year was Rudolph the Red-Nosed Reindeer created?", new[] {"1939", "1935", "1942", "1940"}, 0, 1),
             ("Christmas Around World", "In which country is it traditional to eat KFC for Christmas dinner?", new[] {"Japan", "China", "Korea", "Thailand"}, 0, 1),
-            ("Christmas History", "In what year was Christmas declared a federal holiday in the US?", new[] {"1870", "1850", "1890", "1900"}, 0, 1),
             
-            // General Knowledge Questions (25)
-            ("Geography", "What is the capital of Australia?", new[] {"Sydney", "Melbourne", "Canberra", "Perth"}, 2, 1),
-            ("Geography", "Which river is the longest in the world?", new[] {"Amazon", "Nile", "Mississippi", "Yangtze"}, 1, 1),
-            ("Geography", "What is the smallest country in the world?", new[] {"Monaco", "Vatican City", "San Marino", "Liechtenstein"}, 1, 1),
-            ("Geography", "Which mountain range contains Mount Everest?", new[] {"Andes", "Himalayas", "Alps", "Rockies"}, 1, 1),
-            ("Geography", "What is the largest desert in the world?", new[] {"Sahara", "Antarctica", "Gobi", "Arabian"}, 1, 1),
-            ("Science", "What is the chemical symbol for gold?", new[] {"Go", "Gd", "Au", "Ag"}, 2, 1),
-            ("Science", "How many bones are in the adult human body?", new[] {"196", "206", "216", "186"}, 1, 1),
-            ("Science", "What gas makes up about 78% of Earth's atmosphere?", new[] {"Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"}, 1, 1),
-            ("Science", "What is the hardest natural substance on Earth?", new[] {"Gold", "Iron", "Diamond", "Platinum"}, 2, 1),
-            ("Science", "What planet is known as the Red Planet?", new[] {"Venus", "Mars", "Jupiter", "Saturn"}, 1, 1),
-            ("History", "In which year did World War II end?", new[] {"1944", "1945", "1946", "1947"}, 1, 1),
-            ("History", "Who was the first person to walk on the moon?", new[] {"Buzz Aldrin", "Neil Armstrong", "John Glenn", "Alan Shepard"}, 1, 1),
-            ("History", "In which year did the Berlin Wall fall?", new[] {"1987", "1988", "1989", "1990"}, 2, 1),
-            ("History", "Which ancient wonder of the world was located in Alexandria?", new[] {"Hanging Gardens", "Lighthouse", "Colossus", "Mausoleum"}, 1, 1),
-            ("History", "Who painted the ceiling of the Sistine Chapel?", new[] {"Leonardo da Vinci", "Michelangelo", "Raphael", "Donatello"}, 1, 1),
-            ("Sports", "How many players are on a basketball team on court at one time?", new[] {"4", "5", "6", "7"}, 1, 1),
-            ("Sports", "In which sport would you perform a slam dunk?", new[] {"Volleyball", "Basketball", "Tennis", "Baseball"}, 1, 1),
-            ("Sports", "How often are the Summer Olympic Games held?", new[] {"Every 2 years", "Every 3 years", "Every 4 years", "Every 5 years"}, 2, 1),
-            ("Sports", "What is the maximum score possible in ten-pin bowling?", new[] {"250", "300", "350", "400"}, 1, 1),
-            ("Sports", "In golf, what is one stroke under par called?", new[] {"Eagle", "Birdie", "Bogey", "Albatross"}, 1, 1),
-            ("Literature", "Who wrote 'Romeo and Juliet'?", new[] {"Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"}, 1, 1),
-            ("Literature", "Which book begins with 'It was the best of times, it was the worst of times'?", new[] {"Great Expectations", "A Tale of Two Cities", "Oliver Twist", "David Copperfield"}, 1, 1),
-            ("Movies", "Which movie won the Academy Award for Best Picture in 2020?", new[] {"1917", "Joker", "Parasite", "Once Upon a Time in Hollywood"}, 2, 1),
+            // Music Questions (5)
             ("Music", "Which instrument has 88 keys?", new[] {"Organ", "Piano", "Harpsichord", "Accordion"}, 1, 1),
-            ("Nature", "What is the largest mammal in the world?", new[] {"African Elephant", "Blue Whale", "Giraffe", "Polar Bear"}, 1, 1)
+            ("Music", "What does 'forte' mean in music?", new[] {"Soft", "Loud", "Fast", "Slow"}, 1, 1),
+            ("Music", "Which band released the album 'Abbey Road'?", new[] {"The Rolling Stones", "The Beatles", "Led Zeppelin", "Pink Floyd"}, 1, 1),
+            ("Music", "What is the highest female singing voice?", new[] {"Alto", "Soprano", "Mezzo-soprano", "Contralto"}, 1, 1),
+            ("Music", "How many strings does a standard guitar have?", new[] {"5", "6", "7", "8"}, 1, 1),
+            
+            // General Knowledge Questions (5)
+            ("Geography", "What is the capital of Australia?", new[] {"Sydney", "Melbourne", "Canberra", "Perth"}, 2, 1),
+            ("Science", "What is the chemical symbol for gold?", new[] {"Go", "Gd", "Au", "Ag"}, 2, 1),
+            ("History", "In which year did World War II end?", new[] {"1944", "1945", "1946", "1947"}, 1, 1),
+            ("Sports", "How many players are on a basketball team on court at one time?", new[] {"4", "5", "6", "7"}, 1, 1),
+            ("Nature", "What is the largest mammal in the world?", new[] {"African Elephant", "Blue Whale", "Giraffe", "Polar Bear"}, 1, 1),
+            
+            // Events in 2025 (5)
+            ("2025 Events", "Which major sporting event is scheduled for 2025?", new[] {"FIFA Women's World Cup", "Summer Olympics", "Winter Olympics", "UEFA European Championship"}, 0, 1),
+            ("2025 Events", "What significant anniversary does the United Nations celebrate in 2025?", new[] {"75th", "80th", "85th", "90th"}, 1, 1),
+            ("2025 Events", "Which country is hosting the World Expo 2025?", new[] {"UAE", "Japan", "France", "Germany"}, 1, 1),
+            ("2025 Events", "What major tech event typically happens annually and will occur in 2025?", new[] {"Apple WWDC", "Google I/O", "CES", "All of the above"}, 3, 1),
+            ("2025 Events", "Which planet will have a notable astronomical event visible from Earth in 2025?", new[] {"Mars", "Jupiter", "Saturn", "Venus"}, 2, 1)
         };
 
-        // Shuffle all 50 unique questions
+        // Shuffle all 25 unique questions
         var random = new Random();
         allQuestions = allQuestions.OrderBy(x => random.Next()).ToList();
         
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 25; i++)
         {
             var q = allQuestions[i];
             _questions.Add(new QuizQuestion
